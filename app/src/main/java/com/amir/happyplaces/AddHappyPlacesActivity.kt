@@ -11,6 +11,7 @@ class AddHappyPlacesActivity : AppCompatActivity() {
 
         setSupportActionBar(toolbar_add_place)
 
+        //this line will add the back button
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         toolbar_add_place?.setNavigationOnClickListener {

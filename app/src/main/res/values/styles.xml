@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="CustomNoActionBarTheme" parent="Theme.AppCompat.Light.NoActionBar">
+<!--    <style name="CustomNoActionBarTheme" parent="Theme.AppCompat.Light.NoActionBar">-->
+    <style name="CustomNoActionBarTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="android:statusBarColor">@color/colorPrimary</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
 
     </style>
     <style name="CustomToolbarStyle">
         <item name="android:textColorPrimary">#FFFFFF</item>  //this is for text in toolbar
         <item name="android:colorControlNormal">#FFFFFF</item>  //this is for back button in toolbar
     </style>
+
+
+
 </resources>

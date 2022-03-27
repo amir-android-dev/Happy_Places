@@ -3,7 +3,9 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/The Complete Android 12 &amp; Kotlin Development Masterclass/Happy Places/app/src/main/res/layout/activity_add_happy_places.xml" value="0.13" />
+        <entry key="..\:/The Complete Android 12 &amp; Kotlin Development Masterclass/Happy Places/app/src/main/res/drawable/shape_button_rounded.xml" value="0.1" />
+        <entry key="..\:/The Complete Android 12 &amp; Kotlin Development Masterclass/Happy Places/app/src/main/res/drawable/shape_image_view_border.xml" value="0.1" />
+        <entry key="..\:/The Complete Android 12 &amp; Kotlin Development Masterclass/Happy Places/app/src/main/res/layout/activity_add_happy_places.xml" value="0.1" />
         <entry key="..\:/The Complete Android 12 &amp; Kotlin Development Masterclass/Happy Places/app/src/main/res/layout/activity_main.xml" value="0.11574074074074074" />
       </map>
     </option>
