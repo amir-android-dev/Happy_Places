@@ -91,7 +91,7 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
                 Manifest.permission.READ_EXTERNAL_STORAGE,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
             ).withListener(object : MultiplePermissionsListener {  //instead of new we use object
-                override fun onPermissionsChecked(report: MultiplePermissionsReport) {
+                override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
                     if (report!!.areAllPermissionsGranted()) {
                         Toast.makeText(
                             this@AddHappyPlacesActivity,
