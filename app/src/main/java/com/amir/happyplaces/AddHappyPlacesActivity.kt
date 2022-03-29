@@ -5,12 +5,15 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.provider.Settings
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -20,7 +23,10 @@ import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import kotlinx.android.synthetic.main.activity_add_happy_places.*
+import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
+import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -121,6 +127,9 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
                         //setting image to our iv_image
                         val selectedImageBitmap =
                             MediaStore.Images.Media.getBitmap(this.contentResolver, contentURI)
+                        val saveImageToInternalStorage =
+                            saveImagetoInteranlStorage(selectedImageBitmap)
+                        Log.e("Saved image", "Path : $saveImageToInternalStorage")
                         iv_place_image.setImageBitmap(selectedImageBitmap)
                     } catch (e: IOException) {
                         e.printStackTrace()
@@ -129,6 +138,8 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
             } else if (requestCode == CAMERA) {
                 //we take data and we get extras from it
                 val thumbNail: Bitmap = data!!.extras!!.get("data") as Bitmap
+                val saveImageToInternalStorage = saveImagetoInteranlStorage(thumbNail)
+                Log.e("Saved image", "Path : $saveImageToInternalStorage")
                 iv_place_image.setImageBitmap(thumbNail)
             }
         }
@@ -185,9 +196,43 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
         et_date.setText(sdf.format(cal.time).toString())
     }
 
+    //it returns an URI the location of photo that we store
+    private fun saveImagetoInteranlStorage(bitmap: Bitmap): Uri {
+//contextWrapper extends context
+        val wrapper = ContextWrapper(applicationContext)
+        /*
+        getDir: getDirectory of application.
+        because it has specific place on pour phone where we can store images or file general
+        * */
+        /*mode_private is the mode that allows me to make this file only accessible
+         from the calling application, or all application that share the same user_id
+         so other app will not be able to access to this image_directory
+        */
+        var file = wrapper.getDir(IMAGE_DIRECTORY, Context.MODE_PRIVATE)
+        //1 : file should be at this directory
+        //2: it should have random identifier name: UUID: random unique user id
+        file = File(file, "${UUID.randomUUID()}.jpg")
+        try {
+            //our output stream. we try to output an image to our phone
+            val stream: OutputStream = FileOutputStream(file)
+            //1.format, 2.quality, 3.stream
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+            stream.flush()
+            stream.close()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        /**we say our file has a path => var file = wrapper.getDir.
+        and this is the whole name file = File(file, "${UUID.randomUUID()}.jpg")
+        we use it and parse it in the format of an Uri
+         **/
+        return Uri.parse(file.absolutePath)
+    }
+
     companion object {
         private const val GALLERY = 1
         private const val CAMERA = 2
+        private const val IMAGE_DIRECTORY = "HappyPlacesImages"
 
     }
 }
