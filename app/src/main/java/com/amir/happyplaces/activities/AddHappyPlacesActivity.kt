@@ -15,8 +15,11 @@ import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.amir.happyplaces.R
+import com.amir.happyplaces.database.DatabaseHandler
+import com.amir.happyplaces.models.HappyPlaceModel
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
@@ -40,7 +43,7 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
 
     private var saveImageToInternalStorage: Uri? = null
     private var mLatitude: Double = 0.0
-    private var mLangitude: Double= 0.0
+    private var mLangitude: Double = 0.0
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,6 +65,9 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
             cal.set(Calendar.DAY_OF_MONTH, dayOfMonth)
             updateDateInView()
         }
+        //we call this method outside of dateSetLister as well to populate the date automatically
+        //that's why in onClickListener in dataBase part there is no data, because it not be empty anyway
+        updateDateInView()
         et_date.setOnClickListener(this)
         tv_add_image.setOnClickListener(this)
         btn_save.setOnClickListener(this)
@@ -93,8 +99,42 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
                 }
                 pictureDialog.show()
             }
-            R.id.btn_save->{
-
+            R.id.btn_save -> {
+                when {
+                    et_title.text.isNullOrEmpty() -> {
+                        Toast.makeText(this, "Please enter the title", Toast.LENGTH_LONG).show()
+                    }
+                    et_description.text.isNullOrEmpty() -> {
+                        Toast.makeText(this, "Please enter the Description", Toast.LENGTH_LONG)
+                            .show()
+                    }
+                    et_location.text.isNullOrEmpty() -> {
+                        Toast.makeText(this, "Please enter the location", Toast.LENGTH_LONG).show()
+                    }
+                    saveImageToInternalStorage == null -> {
+                        Toast.makeText(this, "Please select an Image", Toast.LENGTH_LONG).show()
+                    }
+                    else -> {
+                        val happyPlaceModel = HappyPlaceModel(
+                            0,//null because is auto increment
+                            et_title.text.toString(),
+                            saveImageToInternalStorage.toString(),
+                            et_description.text.toString(),
+                            et_date.text.toString(),
+                            et_location.text.toString(),
+                            mLatitude,
+                            mLangitude
+                        )
+                        val dbHandler = DatabaseHandler(this)
+                        val addHappyPlace =dbHandler.addHappyPlace(happyPlaceModel)
+                        if(addHappyPlace>0){
+                            Toast.makeText(this, "Happy place is inserted", Toast.LENGTH_LONG).show()
+                        finish()
+                        }else{
+                            Toast.makeText(this, "Happy place is noooooot inserted", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
             }
         }
     }
@@ -146,7 +186,7 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
             } else if (requestCode == CAMERA) {
                 //we take data and we get extras from it
                 val thumbNail: Bitmap = data!!.extras!!.get("data") as Bitmap
-                 saveImageToInternalStorage = saveImagetoInteranlStorage(thumbNail)
+                saveImageToInternalStorage = saveImagetoInteranlStorage(thumbNail)
                 Log.e("Saved image", "Path : $saveImageToInternalStorage")
                 iv_place_image.setImageBitmap(thumbNail)
             }
