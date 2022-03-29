@@ -6,6 +6,7 @@ import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -76,22 +77,43 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
                 pictureDialog.setItems(pictureDialogItems) { dialog, which ->
                     when (which) {
                         0 -> choosePhotoFromGallery()
-                        1 -> Toast.makeText(this, "camera selection coming soon", Toast.LENGTH_LONG)
-                            .show()
+                        1 -> takePhotoFromCamera()
                     }
-
                 }
                 pictureDialog.show()
             }
-
         }
+    }
+
+    private fun takePhotoFromCamera() {
+        Dexter.withContext(this)
+            .withPermissions(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.CAMERA
+            ).withListener(object : MultiplePermissionsListener {  //instead of new we use object
+                override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
+                    if (report!!.areAllPermissionsGranted()) {
+                        val cameraIntent =
+                            Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                        startActivityForResult(cameraIntent, CAMERA)
+                    }
+                }
+
+                override fun onPermissionRationaleShouldBeShown(
+                    permissions: MutableList<PermissionRequest?>?,
+                    token: PermissionToken?
+                ) {
+                    showRationalDialogForPermissions()
+                }
+            }).onSameThread().check()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode == Activity.RESULT_OK) {
             //we can have multiple request, so all request have an constant number
-                //with resultCode we compare which request has the user
+            //with resultCode we compare which request has the user
             if (requestCode == GALLERY) {
                 if (data != null) {
                     val contentURI = data.data
@@ -104,6 +126,10 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
                         e.printStackTrace()
                     }
                 }
+            } else if (requestCode == CAMERA) {
+                //we take data and we get extras from it
+                val thumbNail: Bitmap = data!!.extras!!.get("data") as Bitmap
+                iv_place_image.setImageBitmap(thumbNail)
             }
         }
     }
@@ -122,6 +148,7 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
                         startActivityForResult(galleryIntent, GALLERY)
                     }
                 }
+
                 override fun onPermissionRationaleShouldBeShown(
                     permissions: MutableList<PermissionRequest?>?,
                     token: PermissionToken?
@@ -160,5 +187,7 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
 
     companion object {
         private const val GALLERY = 1
+        private const val CAMERA = 2
+
     }
 }
