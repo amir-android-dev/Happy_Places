@@ -1,12 +1,14 @@
 package com.amir.happyplaces
 
 import android.Manifest
+import android.app.Activity
 import android.app.AlertDialog
 import android.app.DatePickerDialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.provider.Settings
 import android.view.View
 import android.widget.Toast
@@ -17,9 +19,9 @@ import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 import kotlinx.android.synthetic.main.activity_add_happy_places.*
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
-
 
 /**
  * to make whole class an onClickListener, we follow the instructions of below
@@ -50,7 +52,7 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
             updateDateInView()
         }
         et_date.setOnClickListener(this)
-       tv_add_image.setOnClickListener(this)
+        tv_add_image.setOnClickListener(this)
     }
 
     //instead of to write for every item an OnclickListener, we follow this instruction
@@ -85,6 +87,27 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK) {
+            //we can have multiple request, so all request have an constant number
+                //with resultCode we compare which request has the user
+            if (requestCode == GALLERY) {
+                if (data != null) {
+                    val contentURI = data.data
+                    try {
+                        //setting image to our iv_image
+                        val selectedImageBitmap =
+                            MediaStore.Images.Media.getBitmap(this.contentResolver, contentURI)
+                        iv_place_image.setImageBitmap(selectedImageBitmap)
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+        }
+    }
+
     private fun choosePhotoFromGallery() {
         Dexter.withContext(this)
             .withPermissions(
@@ -93,15 +116,14 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
             ).withListener(object : MultiplePermissionsListener {  //instead of new we use object
                 override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
                     if (report!!.areAllPermissionsGranted()) {
-                        Toast.makeText(
-                            this@AddHappyPlacesActivity,
-                            "Storage READ/WRITE are granted. Now you can select an image from GALLERY",
-                            Toast.LENGTH_LONG).show()
+                        //the first thing that we need an intent which lead us to our gallery
+                        val galleryIntent =
+                            Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                        startActivityForResult(galleryIntent, GALLERY)
                     }
                 }
-
                 override fun onPermissionRationaleShouldBeShown(
-                    permissions:MutableList<PermissionRequest?>?,
+                    permissions: MutableList<PermissionRequest?>?,
                     token: PermissionToken?
                 ) {
                     showRationalDialogForPermissions()
@@ -122,11 +144,11 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
                 val uri = Uri.fromParts("package", packageName, null)
                 intent.data = uri
                 startActivity(intent)
-            } catch (e : ActivityNotFoundException){
+            } catch (e: ActivityNotFoundException) {
                 e.printStackTrace()
             }
-        }.setNegativeButton("Cancel"){dialog,_->
-           dialog.dismiss()
+        }.setNegativeButton("Cancel") { dialog, _ ->
+            dialog.dismiss()
         }.show()
     }
 
@@ -134,5 +156,9 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
         val mFormat = "dd.MM.yyyy"
         val sdf = SimpleDateFormat(mFormat, Locale.getDefault())
         et_date.setText(sdf.format(cal.time).toString())
+    }
+
+    companion object {
+        private const val GALLERY = 1
     }
 }
