@@ -7,6 +7,6 @@
     <string name="text_add_image">ADD IMAGE</string>
     <string name="btn_text_save">SAVE</string>
     <string name="no_happy_places_fount_yet_kindly_add_one">No Happy Places fount yet. Kindly Add one.</string>
-
+    <string name="image_content_description">Image</string>
 
 </resources>
