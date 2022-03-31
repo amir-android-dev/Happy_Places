@@ -126,12 +126,17 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
                             mLangitude
                         )
                         val dbHandler = DatabaseHandler(this)
-                        val addHappyPlace =dbHandler.addHappyPlace(happyPlaceModel)
-                        if(addHappyPlace>0){
-                            Toast.makeText(this, "Happy place is inserted", Toast.LENGTH_LONG).show()
-                        finish()
-                        }else{
-                            Toast.makeText(this, "Happy place is noooooot inserted", Toast.LENGTH_LONG).show()
+                        val addHappyPlace = dbHandler.addHappyPlace(happyPlaceModel)
+                        if (addHappyPlace > 0) {
+                            // Toast.makeText(this, "Happy place is inserted", Toast.LENGTH_LONG).show()
+                            setResult(Activity.RESULT_OK)
+                            finish()
+                        } else {
+                            Toast.makeText(
+                                this,
+                                "Happy place is noooooot inserted",
+                                Toast.LENGTH_LONG
+                            ).show()
                         }
                     }
                 }
