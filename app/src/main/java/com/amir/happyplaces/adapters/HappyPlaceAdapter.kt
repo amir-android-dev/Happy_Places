@@ -14,9 +14,8 @@ import kotlinx.android.synthetic.main.item_happy_place.view.*
 open class HappyPlaceAdapter(
     private val context: Context,
     private var list: ArrayList<HappyPlaceModel>
-) :
-    RecyclerView.Adapter<HappyPlaceAdapter.MViewHolder>() {
-
+) : RecyclerView.Adapter<HappyPlaceAdapter.MViewHolder>() {
+    private var onClickListener: OnClickListener?  = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MViewHolder {
         return MViewHolder(
@@ -30,7 +29,15 @@ open class HappyPlaceAdapter(
             holder.itemView.iv_place_image.setImageURI(Uri.parse(model.image))
             holder.itemView.tvTitle.text = model.title
             holder.itemView.tvDescription.text = model.description
+
+            holder.itemView.setOnClickListener {
+                if(onClickListener != null){
+                    onClickListener!!.onClick(position,model)
+                }
+            }
         }
+
+
     }
 
     override fun getItemCount(): Int {
@@ -40,5 +47,13 @@ open class HappyPlaceAdapter(
 
     class MViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
+    }
+
+    interface OnClickListener {
+        fun onClick(position: Int, model: HappyPlaceModel)
+    }
+
+    fun setOnclickListener(onClickListener: OnClickListener){
+        this.onClickListener = onClickListener
     }
 }
