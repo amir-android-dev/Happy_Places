@@ -137,7 +137,7 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
                     }
                     else -> {
                         val happyPlaceModel = HappyPlaceModel(
-                            0,//null because is auto increment
+                            if(mHappyPlaceDetails==null) 0 else mHappyPlaceDetails!!.id,//null because is auto increment
                             et_title.text.toString(),
                             saveImageToInternalStorage.toString(),
                             et_description.text.toString(),
@@ -147,17 +147,20 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
                             mLangitude
                         )
                         val dbHandler = DatabaseHandler(this)
-                        val addHappyPlace = dbHandler.addHappyPlace(happyPlaceModel)
-                        if (addHappyPlace > 0) {
-                            // Toast.makeText(this, "Happy place is inserted", Toast.LENGTH_LONG).show()
-                            setResult(Activity.RESULT_OK)
-                            finish()
-                        } else {
-                            Toast.makeText(
-                                this,
-                                "Happy place is noooooot inserted",
-                                Toast.LENGTH_LONG
-                            ).show()
+                        if(mHappyPlaceDetails == null){
+                            val addHappyPlace = dbHandler.addHappyPlace(happyPlaceModel)
+                            if (addHappyPlace > 0) {
+                                // Toast.makeText(this, "Happy place is inserted", Toast.LENGTH_LONG).show()
+                                setResult(Activity.RESULT_OK)
+                                finish()
+                            }
+                        }else{
+                            val updateHappyPlace = dbHandler.updateHappyPlace(happyPlaceModel)
+                            if (updateHappyPlace > 0) {
+                                // Toast.makeText(this, "Happy place is inserted", Toast.LENGTH_LONG).show()
+                                setResult(Activity.RESULT_OK)
+                                finish()
+                            }
                         }
                     }
                 }
