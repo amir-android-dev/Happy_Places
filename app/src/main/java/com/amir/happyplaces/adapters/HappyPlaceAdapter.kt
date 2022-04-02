@@ -1,12 +1,16 @@
 package com.amir.happyplaces.adapters
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.amir.happyplaces.R
+import com.amir.happyplaces.activities.AddHappyPlacesActivity
+import com.amir.happyplaces.activities.MainActivity
 import com.amir.happyplaces.models.HappyPlaceModel
 import kotlinx.android.synthetic.main.item_happy_place.view.*
 
@@ -15,7 +19,7 @@ open class HappyPlaceAdapter(
     private val context: Context,
     private var list: ArrayList<HappyPlaceModel>
 ) : RecyclerView.Adapter<HappyPlaceAdapter.MViewHolder>() {
-    private var onClickListener: OnClickListener?  = null
+    private var onClickListener: OnClickListener? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MViewHolder {
         return MViewHolder(
@@ -31,8 +35,8 @@ open class HappyPlaceAdapter(
             holder.itemView.tvDescription.text = model.description
 
             holder.itemView.setOnClickListener {
-                if(onClickListener != null){
-                    onClickListener!!.onClick(position,model)
+                if (onClickListener != null) {
+                    onClickListener!!.onClick(position, model)
                 }
             }
         }
@@ -53,7 +57,15 @@ open class HappyPlaceAdapter(
         fun onClick(position: Int, model: HappyPlaceModel)
     }
 
-    fun setOnclickListener(onClickListener: OnClickListener){
+    fun setOnclickListener(onClickListener: OnClickListener) {
         this.onClickListener = onClickListener
+    }
+
+    fun notifyEditItem(activity: Activity, position: Int, requestCode: Int) {
+        val intent = Intent(context, AddHappyPlacesActivity::class.java)
+        intent.putExtra(MainActivity.EXTRA_PLACE_DETAILS,list[position])
+        activity.startActivityForResult(intent,requestCode)
+        notifyItemChanged(position)
+
     }
 }

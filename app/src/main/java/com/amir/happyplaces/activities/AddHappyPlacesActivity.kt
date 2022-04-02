@@ -45,6 +45,8 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
     private var mLatitude: Double = 0.0
     private var mLangitude: Double = 0.0
 
+    private var mHappyPlaceDetails: HappyPlaceModel? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,6 +60,11 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
         toolbar_add_place?.setNavigationOnClickListener {
             onBackPressed()
         }
+        if (intent.hasExtra((MainActivity.EXTRA_PLACE_DETAILS))) {
+            mHappyPlaceDetails =
+                intent.getParcelableExtra(MainActivity.EXTRA_PLACE_DETAILS) as HappyPlaceModel?
+
+        }
 //OnDateSetListener: is very similar ro setNavigationListener, but here we wait to someone set the date
         dateSetListener = DatePickerDialog.OnDateSetListener { view, year, month, dayOfMonth ->
             cal.set(Calendar.YEAR, year)
@@ -68,6 +75,20 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
         //we call this method outside of dateSetLister as well to populate the date automatically
         //that's why in onClickListener in dataBase part there is no data, because it not be empty anyway
         updateDateInView()
+        if (mHappyPlaceDetails != null) {
+            supportActionBar?.title = "Edit Happy Place"
+            et_title.setText(mHappyPlaceDetails!!.title)
+            et_description.setText(mHappyPlaceDetails!!.description)
+            et_date.setText(mHappyPlaceDetails!!.date)
+            et_location.setText(mHappyPlaceDetails!!.location)
+            mLatitude = mHappyPlaceDetails!!.latitude
+            mLangitude = mHappyPlaceDetails!!.longitude
+
+            saveImageToInternalStorage = Uri.parse(mHappyPlaceDetails!!.image)
+
+            iv_place_image.setImageURI(saveImageToInternalStorage)
+            btn_save.text = "UPDATE"
+        }
         et_date.setOnClickListener(this)
         tv_add_image.setOnClickListener(this)
         btn_save.setOnClickListener(this)
