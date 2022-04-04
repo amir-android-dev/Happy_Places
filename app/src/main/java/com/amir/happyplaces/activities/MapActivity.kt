@@ -27,6 +27,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 intent.getParcelableExtra(MainActivity.EXTRA_PLACE_DETAILS) as HappyPlaceModel?
         }
 
+
         if (mHappyPlaceDetails != null) {
             setSupportActionBar(toolbar_map)
             supportActionBar!!.setDisplayHomeAsUpEnabled(true)
