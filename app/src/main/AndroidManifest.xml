@@ -13,7 +13,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.HappyPlaces">
-
+        <activity
+            android:name=".activities.MapActivity"
+            android:exported="false"
+            android:label="HAPPY PLACE DETAILS"
+            android:screenOrientation="portrait"
+            android:theme="@style/CustomNoActionBarTheme"/>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"

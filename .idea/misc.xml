@@ -4,6 +4,8 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/The Complete Android 12 &amp; Kotlin Development Masterclass/Happy Places/app/src/main/res/layout/activity_add_happy_places.xml" value="0.1" />
+        <entry key="..\:/The Complete Android 12 &amp; Kotlin Development Masterclass/Happy Places/app/src/main/res/layout/activity_happy_place_detail.xml" value="0.1" />
+        <entry key="..\:/The Complete Android 12 &amp; Kotlin Development Masterclass/Happy Places/app/src/main/res/layout/activity_map.xml" value="0.1" />
       </map>
     </option>
   </component>
