@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.graphics.Bitmap
+import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -106,6 +107,16 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
         tv_add_image.setOnClickListener(this)
         btn_save.setOnClickListener(this)
         et_location.setOnClickListener(this)
+        tv_select_current_location.setOnClickListener(this)
+    }
+
+    private fun isLocationEnabled(): Boolean {
+        //asking for location service
+        val locationManager: LocationManager =
+            getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
+            LocationManager.NETWORK_PROVIDER
+        )
     }
 
     //instead of to write for every item an OnclickListener, we follow this instruction
@@ -194,6 +205,40 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
+            }
+            R.id.tv_select_current_location -> {
+                if (!isLocationEnabled()) {
+                    Toast.makeText(
+                        this,
+                        "Your location provider is off; Please turn it on",
+                        Toast.LENGTH_LONG
+                    ).show()
+                    val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                    startActivity(intent)
+                } else {
+                    Dexter.withActivity(this).withPermissions(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                    ).withListener(object : MultiplePermissionsListener{
+                        override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
+                            if(report!!.areAllPermissionsGranted()){
+                                Toast.makeText(
+                                    this@AddHappyPlacesActivity,
+                                    "Location is granted.",
+                                    Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }
+
+                        override fun onPermissionRationaleShouldBeShown(
+                            p0: MutableList<PermissionRequest>?,
+                            p1: PermissionToken?
+                        ) {
+                            showRationalDialogForPermissions()
+                        }
+                    }).onSameThread().check()
+                }
+
             }
         }
     }
