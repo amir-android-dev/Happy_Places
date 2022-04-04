@@ -20,6 +20,10 @@ import androidx.appcompat.app.AppCompatActivity
 import com.amir.happyplaces.R
 import com.amir.happyplaces.database.DatabaseHandler
 import com.amir.happyplaces.models.HappyPlaceModel
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.widget.Autocomplete
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
@@ -60,6 +64,15 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
         toolbar_add_place?.setNavigationOnClickListener {
             onBackPressed()
         }
+
+        if (!Places.isInitialized()) {
+            Places.initialize(
+                this@AddHappyPlacesActivity,
+                resources.getString(R.string.google_maps_api_key)
+            )
+
+
+        }
         if (intent.hasExtra((MainActivity.EXTRA_PLACE_DETAILS))) {
             mHappyPlaceDetails =
                 intent.getParcelableExtra(MainActivity.EXTRA_PLACE_DETAILS) as HappyPlaceModel?
@@ -92,6 +105,7 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
         et_date.setOnClickListener(this)
         tv_add_image.setOnClickListener(this)
         btn_save.setOnClickListener(this)
+        et_location.setOnClickListener(this)
     }
 
     //instead of to write for every item an OnclickListener, we follow this instruction
@@ -137,7 +151,7 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
                     }
                     else -> {
                         val happyPlaceModel = HappyPlaceModel(
-                            if(mHappyPlaceDetails==null) 0 else mHappyPlaceDetails!!.id,//null because is auto increment
+                            if (mHappyPlaceDetails == null) 0 else mHappyPlaceDetails!!.id,//null because is auto increment
                             et_title.text.toString(),
                             saveImageToInternalStorage.toString(),
                             et_description.text.toString(),
@@ -147,14 +161,14 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
                             mLangitude
                         )
                         val dbHandler = DatabaseHandler(this)
-                        if(mHappyPlaceDetails == null){
+                        if (mHappyPlaceDetails == null) {
                             val addHappyPlace = dbHandler.addHappyPlace(happyPlaceModel)
                             if (addHappyPlace > 0) {
                                 // Toast.makeText(this, "Happy place is inserted", Toast.LENGTH_LONG).show()
                                 setResult(Activity.RESULT_OK)
                                 finish()
                             }
-                        }else{
+                        } else {
                             val updateHappyPlace = dbHandler.updateHappyPlace(happyPlaceModel)
                             if (updateHappyPlace > 0) {
                                 // Toast.makeText(this, "Happy place is inserted", Toast.LENGTH_LONG).show()
@@ -163,6 +177,22 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
                             }
                         }
                     }
+                }
+            }
+            R.id.et_location -> {
+                try {
+                    //the list of fields which has to be passed
+                    val fields = listOf(
+                        Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG, Place.Field.ADDRESS
+                    )
+                    //start the autocomplete intent with a unique request code
+                    val intent =
+                        Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
+                            .build(this@AddHappyPlacesActivity)
+                    startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE)
+
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
             }
         }
@@ -218,6 +248,11 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
                 saveImageToInternalStorage = saveImagetoInteranlStorage(thumbNail)
                 Log.e("Saved image", "Path : $saveImageToInternalStorage")
                 iv_place_image.setImageBitmap(thumbNail)
+            } else if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
+                val place: Place = Autocomplete.getPlaceFromIntent(data!!)
+                et_location.setText(place.address)
+                mLatitude = place.latLng!!.latitude
+                mLangitude = place.latLng!!.longitude
             }
         }
     }
@@ -310,6 +345,7 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
         private const val GALLERY = 1
         private const val CAMERA = 2
         private const val IMAGE_DIRECTORY = "HappyPlacesImages"
+        private const val PLACE_AUTOCOMPLETE_REQUEST_CODE = 3
 
     }
 }

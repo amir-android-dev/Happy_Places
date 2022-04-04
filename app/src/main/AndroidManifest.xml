@@ -13,12 +13,18 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.HappyPlaces">
+
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_api_key" />
+
         <activity
             android:name=".activities.HappyPlaceDetailActivity"
             android:exported="false"
             android:label="HAPPY PLACE DETAILS"
             android:screenOrientation="portrait"
-            android:theme="@style/CustomNoActionBarTheme"/>
+            android:theme="@style/CustomNoActionBarTheme" />
         <activity
             android:name=".activities.AddHappyPlacesActivity"
             android:exported="false"
