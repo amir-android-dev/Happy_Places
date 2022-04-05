@@ -1,6 +1,7 @@
 package com.amir.happyplaces.activities
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.app.DatePickerDialog
@@ -9,9 +10,11 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.graphics.Bitmap
+import android.location.Location
 import android.location.LocationManager
 import android.net.Uri
 import android.os.Bundle
+import android.os.Looper
 import android.provider.MediaStore
 import android.provider.Settings
 import android.util.Log
@@ -21,6 +24,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.amir.happyplaces.R
 import com.amir.happyplaces.database.DatabaseHandler
 import com.amir.happyplaces.models.HappyPlaceModel
+import com.google.android.gms.location.*
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.Autocomplete
@@ -52,6 +56,8 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
 
     private var mHappyPlaceDetails: HappyPlaceModel? = null
 
+    private lateinit var mFusedLocationProviderClient: FusedLocationProviderClient
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,6 +71,9 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
         toolbar_add_place?.setNavigationOnClickListener {
             onBackPressed()
         }
+
+        mFusedLocationProviderClient =
+            LocationServices.getFusedLocationProviderClient(this@AddHappyPlacesActivity)
 
         if (!Places.isInitialized()) {
             Places.initialize(
@@ -117,6 +126,30 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
             LocationManager.NETWORK_PROVIDER
         )
+    }
+
+    //a function which allows us to access to location of the user
+    @SuppressLint("MissingPermission")
+    private fun requestNewLocationData() {
+        var mLocationRequest = LocationRequest()
+        mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        mLocationRequest.interval = 1000
+        mLocationRequest.numUpdates = 1
+        Looper.myLooper()?.let {
+            mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest,mLocationCallBack,
+                it
+            )
+        }
+
+    }
+    private val mLocationCallBack= object : LocationCallback(){
+        override fun onLocationResult(locationResult: LocationResult) {
+            val mLastLocation: Location = locationResult!!.lastLocation
+            mLatitude = mLastLocation.latitude
+            Log.i("Current latitude","$mLatitude")
+            mLangitude = mLastLocation.longitude
+            Log.i("Current longitude","$mLangitude")
+        }
     }
 
     //instead of to write for every item an OnclickListener, we follow this instruction
@@ -219,14 +252,10 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
                     Dexter.withActivity(this).withPermissions(
                         Manifest.permission.ACCESS_FINE_LOCATION,
                         Manifest.permission.ACCESS_COARSE_LOCATION
-                    ).withListener(object : MultiplePermissionsListener{
+                    ).withListener(object : MultiplePermissionsListener {
                         override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
-                            if(report!!.areAllPermissionsGranted()){
-                                Toast.makeText(
-                                    this@AddHappyPlacesActivity,
-                                    "Location is granted.",
-                                    Toast.LENGTH_LONG
-                                ).show()
+                            if (report!!.areAllPermissionsGranted()) {
+                           requestNewLocationData()
                             }
                         }
 
