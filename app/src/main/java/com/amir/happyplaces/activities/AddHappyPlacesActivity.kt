@@ -24,6 +24,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.amir.happyplaces.R
 import com.amir.happyplaces.database.DatabaseHandler
 import com.amir.happyplaces.models.HappyPlaceModel
+import com.amir.happyplaces.utils.GetAddressFromLatLng
 import com.google.android.gms.location.*
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
@@ -136,19 +137,33 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
         mLocationRequest.interval = 1000
         mLocationRequest.numUpdates = 1
         Looper.myLooper()?.let {
-            mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest,mLocationCallBack,
+            mFusedLocationProviderClient.requestLocationUpdates(
+                mLocationRequest, mLocationCallBack,
                 it
             )
         }
 
     }
-    private val mLocationCallBack= object : LocationCallback(){
+
+    private val mLocationCallBack = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             val mLastLocation: Location = locationResult!!.lastLocation
             mLatitude = mLastLocation.latitude
-            Log.i("Current latitude","$mLatitude")
+            Log.i("Current latitude", "$mLatitude")
             mLangitude = mLastLocation.longitude
-            Log.i("Current longitude","$mLangitude")
+            Log.i("Current longitude", "$mLangitude")
+            val addressTask =
+                GetAddressFromLatLng(this@AddHappyPlacesActivity, mLatitude, mLangitude)
+            addressTask.setAddressListener(object : GetAddressFromLatLng.AddressListener {
+                override fun onAddressFound(address: String?) {
+                    et_location.setText(address)
+                }
+
+                override fun onError() {
+                    Log.e("Get Address:: ", " Something went wrong")
+                }
+            })
+            addressTask.getAddress()
         }
     }
 
@@ -255,7 +270,7 @@ class AddHappyPlacesActivity : AppCompatActivity(), View.OnClickListener {
                     ).withListener(object : MultiplePermissionsListener {
                         override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
                             if (report!!.areAllPermissionsGranted()) {
-                           requestNewLocationData()
+                                requestNewLocationData()
                             }
                         }
 
